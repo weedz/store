@@ -1,0 +1,34 @@
+{
+  "name": "@weedzcokie/store",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "dist/"
+  ],
+  "author": {
+    "name": "Linus Björklund"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.2.3",
+    "preact": "^10.5.14",
+    "rollup": "^2.53.2",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "preact": "^10.5.14"
+  }
+}
