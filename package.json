@@ -17,9 +17,7 @@
   "files": [
     "dist/"
   ],
-  "author": {
-    "name": "Linus Björklund"
-  },
+  "author": "Linus Björklund",
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.3",
@@ -30,5 +28,14 @@
   },
   "peerDependencies": {
     "preact": "^10.5.14"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weedz/store.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/weedz/store/issues"
+  },
+  "homepage": "https://github.com/weedz/store#readme"
 }
