@@ -8,6 +8,7 @@
 `store.ts`:
 
 ```typescript
+// Setup store
 import { createStore } from "@weedzcokie/store";
 type StoreType = {
     msg: string
@@ -21,6 +22,15 @@ type StoreKeys = keyof StoreType;
 // Optionally, export `Store` and `updateStore`:
 export const Store = store.Store;
 export const updateStore = store.updateStore;
+
+// Use store
+store.subscribe("msg", msg => {
+    console.log(`new message: ${msg}`);
+});
+
+store.updateStore({
+    msg: "Hello, world!"
+});
 ```
 
 ### Preact component
