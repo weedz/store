@@ -79,5 +79,11 @@ export default class App extends StoreComponent {
         });
     }
     // ...
+    
+    // If you need to use `componentWillUnmount`, do not forget to call `super.componentWillUnmount()`
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        // ...
+    }
 }
 ```
