@@ -53,29 +53,17 @@ export abstract class StoreComponent<P = unknown, S = unknown> extends Component
         }
     }
 }
-export abstract class PureStoreComponent<P = unknown, S = unknown> extends PureComponent<P, S> {
-    listeners: Array<() => void> = [];
-
-    listen<T extends StoreKeys>(key: T, cb: PartialStoreListener<StoreType, T>) {
-        this.listeners.push(store.subscribe(key, cb));
-    }
-
-    componentWillUnmount() {
-        for (const unsubscribe of this.listeners) {
-            unsubscribe();
-        }
-    }
-}
 ```
 
 Can now be used as:
 
 ```tsx
-import { StoreComponent } from "./store";
+import { StoreComponent, Store } from "./store";
 export default class App extends StoreComponent {
     componentDidMount() {
         this.listen("msg", msg => {
             console.log(msg);
+            this.forceUpdate();
         });
     }
     // ...
@@ -84,6 +72,13 @@ export default class App extends StoreComponent {
     componentWillUnmount() {
         super.componentWillUnmount();
         // ...
+    }
+
+    // store is available from the exported Store variable.
+    render() {
+        return (
+            <p>{Store.msg}</p>
+        );
     }
 }
 ```
