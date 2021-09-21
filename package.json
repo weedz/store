@@ -1,6 +1,6 @@
 {
   "name": "@weedzcokie/store",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Tiny store management",
   "type": "module",
   "main": "dist/index.js",
