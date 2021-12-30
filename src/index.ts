@@ -1,6 +1,12 @@
 export type PartialStoreListener<T, K extends keyof T> = (arg: T[K]) => void;
 
-export function createStore<StoreType extends Record<string, unknown>>(initialState: StoreType) {
+export interface CreatedStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType> {
+    Store: Readonly<StoreType>
+    subscribe: <K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) => () => void
+    updateStore: (newStore: Partial<StoreType>) => void
+}
+
+export function createStore<StoreType extends Record<string, unknown>>(initialState: StoreType): CreatedStore<StoreType, keyof StoreType> {
     type StoreKeys = keyof StoreType;
 
     const storeKeys = Object.keys(initialState) as StoreKeys[];
