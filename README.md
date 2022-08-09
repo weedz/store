@@ -43,7 +43,7 @@ import { createStore, PartialStoreListener } from "@weedzcokie/store";
 export abstract class StoreComponent<P = unknown, S = unknown> extends Component<P, S> {
     listeners: Array<() => void> = [];
 
-    listen<T extends StoreKeys>(key: T, cb: PartialStoreListener<StoreType, T>) {
+    listen<T extends StoreKeys>(key: T, cb: PartialStoreListener<StoreType, T> = () => this.forceUpdate()) {
         this.listeners.push(store.subscribe(key, cb));
     }
 
@@ -80,5 +80,31 @@ export default class App extends StoreComponent {
             <p>{Store.msg}</p>
         );
     }
+}
+```
+
+Or using hooks (don't question `useState(false)` and `set(!s)`, it works..):
+```tsx
+export function useStore<T extends StoreKeys>(keys: T[]) {
+    const [s, set] = useState(false);
+
+    useEffect(() => {
+        const update = () => set(!s);
+        const listeners = keys.map(key => store.subscribe(key, update));
+
+        return () => {
+            for (const unsubscribe of listeners) {
+                unsubscribe()
+            }
+        }
+    });
+}
+
+function App() {
+    useStore(["msg"]);
+
+    return (
+        <p>{Store.msg}</p>
+    );
 }
 ```
