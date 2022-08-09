@@ -11,11 +11,11 @@
 // Setup store
 import { createStore } from "@weedzcokie/store";
 type StoreType = {
-    msg: string
+    counter: number
 };
 
 const store = createStore<StoreType>({
-    msg: ""
+    counter: 0
 });
 type StoreKeys = keyof StoreType;
 
@@ -24,12 +24,12 @@ export const Store = store.Store;
 export const updateStore = store.updateStore;
 
 // Use store
-store.subscribe("msg", msg => {
-    console.log(`new message: ${msg}`);
+store.subscribe("counter", count => {
+    console.log(`current count: ${count}`);
 });
 
 store.updateStore({
-    msg: "Hello, world!"
+    counter: 1
 });
 ```
 
@@ -61,10 +61,7 @@ Can now be used as:
 import { StoreComponent, Store } from "./store";
 export default class App extends StoreComponent {
     componentDidMount() {
-        this.listen("msg", msg => {
-            console.log(msg);
-            this.forceUpdate();
-        });
+        this.listen("counter");
     }
     // ...
     
@@ -77,14 +74,21 @@ export default class App extends StoreComponent {
     // store is available from the exported Store variable.
     render() {
         return (
-            <p>{Store.msg}</p>
+            <p>Current count: {Store.counter}</p>
+            <button onClick={() => updateStore({counter: Store.counter + 1})}>Increment count</button>
         );
     }
 }
 ```
 
+### Hooks
+
 Or using hooks (don't question `useState(false)` and `set(!s)`, it works..):
 ```tsx
+import { Store } from "./store";
+
+// Create store as in `store.ts`.
+
 export function useStore<T extends StoreKeys>(keys: T[]) {
     const [s, set] = useState(false);
 
@@ -101,10 +105,11 @@ export function useStore<T extends StoreKeys>(keys: T[]) {
 }
 
 function App() {
-    useStore(["msg"]);
+    useStore(["counter"]);
 
     return (
-        <p>{Store.msg}</p>
+        <p>Current count: {Store.counter}</p>
+        <button onClick={() => updateStore({counter: Store.counter + 1})}>Increment count</button>
     );
 }
 ```
