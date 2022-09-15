@@ -27,11 +27,12 @@ function deepMerge(source: Record<string, unknown> | {}, target: Record<string, 
 export function createStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType = keyof StoreType>(initialState: StoreType): CreatedStore<StoreType, StoreKeys> {
     const storeKeys = Object.keys(initialState) as StoreKeys[];
 
-    const listeners = Object.fromEntries(
-        storeKeys.map(key => [key, [] as PartialStoreListener<StoreType, StoreKeys>[]])
-    ) as {
+    const listeners = storeKeys.reduce((acc, key) => {
+        acc[key] = [];
+        return acc;
+    }, {} as {
         [K in StoreKeys]: PartialStoreListener<StoreType, StoreKeys>[]
-    };
+    });
 
     const store = initialState;
 
