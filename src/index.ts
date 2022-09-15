@@ -24,20 +24,14 @@ function deepMerge(source: Record<string, unknown> | {}, target: Record<string, 
     return target;
 }
 
-export function createStore<StoreType extends Record<string, unknown>>(initialState: StoreType): CreatedStore<StoreType, keyof StoreType> {
-    type StoreKeys = keyof StoreType;
-
+export function createStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType = keyof StoreType>(initialState: StoreType): CreatedStore<StoreType, StoreKeys> {
     const storeKeys = Object.keys(initialState) as StoreKeys[];
 
-    // FIXME: Don't really like `reduce` when creating an object..
-    const listeners: {
-        [K in StoreKeys]: PartialStoreListener<StoreType, K>[]
-    } = storeKeys.reduce((acc, key) => {
-        acc[key] = [];
-        return acc;
-    }, {} as {
-        [K in StoreKeys]: PartialStoreListener<StoreType, K>[]
-    });
+    const listeners = Object.fromEntries(
+        storeKeys.map(key => [key, [] as PartialStoreListener<StoreType, StoreKeys>[]])
+    ) as {
+        [K in StoreKeys]: PartialStoreListener<StoreType, StoreKeys>[]
+    };
 
     const store = initialState;
 
