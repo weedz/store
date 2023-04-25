@@ -1,13 +1,6 @@
-export type PartialStoreListener<T, K extends keyof T> = (arg: T[K]) => void;
+export type PartialStoreListener<T, K extends keyof T> = (arg: T[K], key: K) => void;
 
 type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>;
-
-export interface CreatedStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType> {
-    Store: Readonly<StoreType>
-    subscribe: <K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) => () => void
-    updateStore: (newStore: Partial<StoreType>) => void
-    mergeUpdateStore: (partialStoreItem: DeepPartial<StoreType>) => void
-}
 
 function deepMerge(source: Record<string, unknown> | {}, target: Record<string, unknown>) {
     for (const [key, value] of Object.entries(source)) {
@@ -24,44 +17,58 @@ function deepMerge(source: Record<string, unknown> | {}, target: Record<string, 
     return target;
 }
 
-export function createStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType = keyof StoreType>(initialState: StoreType): CreatedStore<StoreType, StoreKeys> {
-    const storeKeys = Object.keys(initialState) as StoreKeys[];
-
-    const listeners = storeKeys.reduce((acc, key) => {
-        acc[key] = [];
-        return acc;
-    }, {} as {
+class Store<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType = keyof StoreType> {
+    #listeners: {
         [K in StoreKeys]: PartialStoreListener<StoreType, StoreKeys>[]
-    });
-
-    const store = initialState;
-
-    function unsubscribe<K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) {
-        listeners[key].splice(listeners[key].indexOf(cb as PartialStoreListener<StoreType, StoreKeys>)>>>0, 1);
+    };
+    #store: StoreType;
+    Store: Readonly<StoreType>;
+    
+    constructor(initialState: StoreType) {
+        const keys = Object.keys(initialState) as StoreKeys[];
+        this.#listeners = keys.reduce((acc, key) => {
+            acc[key] = [];
+            return acc;
+        }, {} as {
+            [K in StoreKeys]: PartialStoreListener<StoreType, StoreKeys>[]
+        });
+        this.#store = initialState;
+        this.Store = this.#store;
     }
 
-    function triggerKeyListeners(newStore: DeepPartial<StoreType>) {
-        for (const key of Object.keys(newStore) as StoreKeys[]) {
-            for (const listener of listeners[key]) {
-                const data = newStore[key] as StoreType[typeof key];
-                (listener as PartialStoreListener<StoreType, StoreKeys>)(data);
-            }
+    getStore() {
+        return this.#store as Readonly<StoreType>;
+    }
+
+    unsubscribe<K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) {
+        this.#listeners[key].splice(this.#listeners[key].indexOf(cb as PartialStoreListener<StoreType, StoreKeys>)>>>0, 1);
+    }
+
+    #triggerKeyListener<K extends StoreKeys>(key: K, newData: StoreType[K]) {
+        for (const listener of this.#listeners[key]) {
+            (listener as PartialStoreListener<StoreType, StoreKeys>)(newData, key);
         }
     }
 
-    return {
-        Store: store as Readonly<StoreType>,
-        subscribe<K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) {
-            listeners[key].push(cb as PartialStoreListener<StoreType, StoreKeys>);
-            return () => unsubscribe(key, cb);
-        },
-        updateStore(newStore: Partial<StoreType>) {
-            triggerKeyListeners(newStore);
-            Object.assign(store, newStore);
-        },
-        mergeUpdateStore(partialStoreItem: DeepPartial<StoreType>) {
-            triggerKeyListeners(partialStoreItem);
-            deepMerge(partialStoreItem, store);
-        },
+    subscribe<K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) {
+        this.#listeners[key].push(cb as PartialStoreListener<StoreType, StoreKeys>);
+        return () => this.unsubscribe(key, cb);
     }
+    updateStore<K extends StoreKeys>(key: K, newData: StoreType[K]) {
+        this.#triggerKeyListener(key, newData);
+        this.#store[key] = newData;
+    }
+    triggerStoreUpdate<K extends StoreKeys>(key: K) {
+        this.#triggerKeyListener(key, this.#store[key]);
+    }
+    mergeUpdateStore(partialStoreItem: DeepPartial<StoreType>) {
+        for (const key of Object.keys(partialStoreItem) as StoreKeys[]) {
+            this.#triggerKeyListener(key, partialStoreItem[key] as StoreType[typeof key]);
+        }
+        deepMerge(partialStoreItem, this.#store);
+    }
+}
+
+export function createStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType = keyof StoreType>(initialState: StoreType) {
+    return new Store<StoreType>(initialState);
 }

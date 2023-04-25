@@ -113,3 +113,90 @@ function App() {
     );
 }
 ```
+
+#### Hooks with "initializers"
+
+`./store.ts`:
+```tsx
+type StoreType = {
+    user: null | StoredUser
+    favorites: Set<number>
+}
+type StoreKeys = keyof StoreType;
+
+const store = createStore<StoreType>({
+    user: null,
+    favorites: new Set(),
+});
+
+const initFn: Partial<{
+    [K in StoreKeys]: () => void
+}> = {
+    user: async () => {
+        // Check if logged in
+        const user = localStorage.getItem("user");
+        if (user) {
+            const res = await fetch("/api/auth");
+
+            if (!res || res.status !== 200) {
+                localStorage.removeItem("user");
+                store.updateStore({user: null});
+                return;
+            }
+
+            store.updateStore({user: user})
+        }
+    },
+}
+
+export function useStore<T extends StoreKeys>(keys: T[]) {
+    const [s, set] = useState(false);
+    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        const propsToLoad: Set<string> = new Set();
+        const update = (store: StoreType[T], key: string) => {
+            if (propsToLoad.size) {
+                propsToLoad.delete(key);
+            }
+            setLoading(!!propsToLoad.size);
+            set(!s);
+        };
+        const listeners = keys.map(key => store.subscribe(key, update));
+        
+        for (const key of keys) {
+            const fn = initFn[key];
+            if (fn) {
+                propsToLoad.add(key);
+                setLoading(true);
+                fn();
+                delete initFn[key];
+            }
+        }
+
+        return () => {
+            for (const unsubscribe of listeners) {
+                unsubscribe()
+            }
+        }
+    });
+
+    const mappedStore: Pick<StoreType, T> = keys.reduce((acc, key) => {
+        acc[key] = Store[key];
+        return acc;
+    }, {} as Pick<StoreType, T>);
+
+    return {loading, data: mappedStore};
+}
+```
+
+`./profile.tsx`:
+```tsx
+export default ProfilePage() {
+    const {loading, data} = useStore(["user"]);
+    if (loading || !data.user) {
+        return null;
+    }
+
+    return <Profile />
+}
+```
