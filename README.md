@@ -5,6 +5,8 @@
 
 ## Usage
 
+A full example can be found in [example](https://github.com/weedz/store/tree/master/example).
+
 `store.ts`:
 
 ```typescript
@@ -150,19 +152,19 @@ const initFn: Partial<{
 }
 
 export function useStore<T extends StoreKeys>(keys: T[]) {
-    const [s, set] = useState(false);
+    const [_s, set] = useState(false);
     const [loading, setLoading] = useState(false);
     useEffect(() => {
         const propsToLoad: Set<string> = new Set();
-        const update = (store: StoreType[T], key: string) => {
+        const update = (_store: StoreType[T], key: string) => {
             if (propsToLoad.size) {
                 propsToLoad.delete(key);
             }
             setLoading(!!propsToLoad.size);
-            set(!s);
+            set(current => !current);
         };
         const listeners = keys.map(key => store.subscribe(key, update));
-        
+
         for (const key of keys) {
             const fn = initFn[key];
             if (fn) {
@@ -175,17 +177,12 @@ export function useStore<T extends StoreKeys>(keys: T[]) {
 
         return () => {
             for (const unsubscribe of listeners) {
-                unsubscribe()
+                unsubscribe();
             }
-        }
-    });
+        };
+    }, []);
 
-    const mappedStore: Pick<StoreType, T> = keys.reduce((acc, key) => {
-        acc[key] = Store[key];
-        return acc;
-    }, {} as Pick<StoreType, T>);
-
-    return {loading, data: mappedStore};
+    return { loading, data: Store as Pick<StoreType, T> };
 }
 ```
 
