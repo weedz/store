@@ -23,7 +23,7 @@ class Store<StoreType extends Record<string, unknown>, StoreKeys extends keyof S
     };
     #store: StoreType;
     Store: Readonly<StoreType>;
-    
+
     constructor(initialState: StoreType) {
         const keys = Object.keys(initialState) as StoreKeys[];
         this.#listeners = keys.reduce((acc, key) => {
@@ -34,10 +34,6 @@ class Store<StoreType extends Record<string, unknown>, StoreKeys extends keyof S
         });
         this.#store = initialState;
         this.Store = this.#store;
-    }
-
-    getStore() {
-        return this.#store as Readonly<StoreType>;
     }
 
     unsubscribe<K extends StoreKeys>(key: K, cb: PartialStoreListener<StoreType, K>) {
