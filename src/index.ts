@@ -65,6 +65,6 @@ class Store<StoreType extends Record<string, unknown>, StoreKeys extends keyof S
     }
 }
 
-export function createStore<StoreType extends Record<string, unknown>, StoreKeys extends keyof StoreType = keyof StoreType>(initialState: StoreType) {
+export function createStore<StoreType extends Record<string, unknown>>(initialState: StoreType) {
     return new Store<StoreType>(initialState);
 }
