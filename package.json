@@ -21,10 +21,10 @@
   "author": "Linus Björklund",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.0",
-    "rollup": "^3.21.0",
-    "tslib": "^2.5.0",
-    "typescript": "^5.0.4"
+    "@rollup/plugin-typescript": "^11.1.2",
+    "rollup": "^3.26.2",
+    "tslib": "^2.6.0",
+    "typescript": "^5.1.6"
   },
   "repository": {
     "type": "git",
