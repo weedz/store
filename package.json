@@ -31,7 +31,7 @@
     "type": "git",
     "url": "git+https://github.com/weedz/store.git"
   },
-  "keywords": [],
+  "keywords": ["state","store"],
   "bugs": {
     "url": "https://github.com/weedz/store/issues"
   },
