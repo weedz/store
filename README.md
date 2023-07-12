@@ -85,9 +85,9 @@ export default class App extends StoreComponent {
 
 ### Hooks
 
-Or using hooks (don't question `useState(false)` and `set(!s)`, it works..):
+Or using hooks:
 ```tsx
-import { Store } from "./store";
+import { Store, updateStore } from "./store";
 
 // Create store as in `store.ts`.
 
@@ -95,7 +95,7 @@ export function useStore<T extends StoreKeys>(keys: T[]) {
     const [s, set] = useState(false);
 
     useEffect(() => {
-        const update = () => set(!s);
+        const update = () => set(current => !current);
         const listeners = keys.map(key => store.subscribe(key, update));
 
         return () => {
@@ -103,7 +103,7 @@ export function useStore<T extends StoreKeys>(keys: T[]) {
                 unsubscribe()
             }
         }
-    });
+    }, []);
 }
 
 function App() {
