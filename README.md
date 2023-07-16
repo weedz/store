@@ -104,6 +104,8 @@ export function useStore<T extends StoreKeys>(keys: T[]) {
             }
         }
     }, []);
+
+    return { data: Store as Pick<StoreType, T> };
 }
 
 function App() {
