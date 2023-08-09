@@ -133,6 +133,7 @@ const store = createStore<StoreType>({
     favorites: new Set(),
 });
 
+const initFnLoaders: Map<string, Promise<unknown>> = new Map();
 const initFn: Partial<{
     [K in StoreKeys]: () => void
 }> = {
@@ -154,37 +155,50 @@ const initFn: Partial<{
 }
 
 export function useStore<T extends StoreKeys>(keys: T[]) {
-    const [_s, set] = useState(false);
-    const [loading, setLoading] = useState(false);
-    useEffect(() => {
-        const propsToLoad: Set<string> = new Set();
-        const update = (_store: StoreType[T], key: string) => {
-            if (propsToLoad.size) {
-                propsToLoad.delete(key);
-            }
-            setLoading(!!propsToLoad.size);
-            set(current => !current);
-        };
-        const listeners = keys.map(key => store.subscribe(key, update));
+  const [_s, set] = useState(false);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const propsToLoad: Set<string> = new Set();
+    const update = () => set(current => !current);
+    const listeners = keys.map((key) => store.subscribe(key, update));
 
-        for (const key of keys) {
-            const fn = initFn[key];
-            if (fn) {
-                propsToLoad.add(key);
-                setLoading(true);
-                fn();
-                delete initFn[key];
-            }
-        }
+    for (const key of keys) {
+      let promise = initFnLoaders.get(key);
+      if (promise) {
+        propsToLoad.add(key);
+        promise.then(() => {
+          propsToLoad.delete(key);
+          setLoading(!!propsToLoad.size);
+        });
+      }
 
-        return () => {
-            for (const unsubscribe of listeners) {
-                unsubscribe();
-            }
-        };
-    }, []);
+      const fn = initFn[key];
+      if (fn) {
+        propsToLoad.add(key);
+        promise = fn().then(() => {
+          initFnLoaders.delete(key);
+          propsToLoad.delete(key);
+          setLoading(!!propsToLoad.size);
+        });
 
-    return { loading, data: Store as Pick<StoreType, T> };
+        initFnLoaders.set(key, promise);
+
+        delete initFn[key];
+      }
+    }
+
+    if (propsToLoad.size === 0) {
+      setLoading(false);
+    }
+
+    return () => {
+      for (const unsubscribe of listeners) {
+        unsubscribe();
+      }
+    };
+  }, []);
+
+  return { loading, data: Store as Pick<StoreType, T> };
 }
 ```
 
