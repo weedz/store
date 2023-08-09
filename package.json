@@ -1,6 +1,6 @@
 {
   "name": "@weedzcokie/store",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Tiny store management",
   "type": "module",
   "main": "dist/index.js",
@@ -23,15 +23,18 @@
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.2",
-    "rollup": "^3.26.2",
-    "tslib": "^2.6.0",
+    "rollup": "^3.28.0",
+    "tslib": "^2.6.1",
     "typescript": "^5.1.6"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/weedz/store.git"
   },
-  "keywords": ["state","store"],
+  "keywords": [
+    "state",
+    "store"
+  ],
   "bugs": {
     "url": "https://github.com/weedz/store/issues"
   },
