@@ -21,9 +21,7 @@ const store = createStore<StoreType>({
 });
 type StoreKeys = keyof StoreType;
 
-// Optionally, export `Store` and `updateStore`:
 export const Store = store.Store;
-export const updateStore = store.updateStore;
 
 // Use store
 store.subscribe("counter", count => {
@@ -60,7 +58,7 @@ export abstract class StoreComponent<P = unknown, S = unknown> extends Component
 Can now be used as:
 
 ```tsx
-import { StoreComponent, Store } from "./store";
+import { StoreComponent, Store, store } from "./store";
 export default class App extends StoreComponent {
     componentDidMount() {
         this.listen("counter");
@@ -77,7 +75,7 @@ export default class App extends StoreComponent {
     render() {
         return (
             <p>Current count: {Store.counter}</p>
-            <button onClick={() => updateStore({counter: Store.counter + 1})}>Increment count</button>
+            <button onClick={() => store.updateStore({counter: Store.counter + 1})}>Increment count</button>
         );
     }
 }
@@ -87,7 +85,7 @@ export default class App extends StoreComponent {
 
 Or using hooks:
 ```tsx
-import { Store, updateStore } from "./store";
+import { Store, store } from "./store";
 
 // Create store as in `store.ts`.
 
@@ -113,7 +111,7 @@ function App() {
 
     return (
         <p>Current count: {Store.counter}</p>
-        <button onClick={() => updateStore({counter: Store.counter + 1})}>Increment count</button>
+        <button onClick={() => store.updateStore({counter: Store.counter + 1})}>Increment count</button>
     );
 }
 ```
